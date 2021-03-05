@@ -5,15 +5,72 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pictionary game</title>
+    <style>
+        .active {
+            color:red;
+        }
+    </style>
 </head>
 <body>
     <h1>Pictionary game</h1>
-
+    <ul class="users"></ul>
 
     <!--SCRIPT-->
     <script src="https://cdn.jsdelivr.net/npm/p5@1.2.0/lib/p5.js"></script>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="sketch.js"></script>
+    <script >
+        "use strict";
+const socket = io();
+
+const username = prompt('What is your username');
+socket.emit('username', username);
+
+let canDraw = false;
+
+const usersList = document.querySelector('.users');
+socket.on('users', (data) => {
+    usersList.innerHTML = '';
+    data.forEach(user => {
+        const li = document.createElement("li");
+        li.innerHTML = user.username;
+        if( user.active){
+            li.classList.add('active');
+            
+        }
+        //appendchild
+        usersList.appendChild(li);
+
+        if(user.username === username){
+            canDraw = user.active;
+        };
+    });
+})
+
+function setup() {
+    createCanvas(windowWidth, windowHeight);
+}
+
+function mouseDragged () {
+    if (!canDraw) return;
+    line (pmouseX, pmouseY, mouseX, mouseY);
+
+    socket.emit('line', {
+        pmouseX,
+        pmouseY,
+        mouseX,
+        mouseY 
+    });
+
+    socket.on('line', (data) => {
+        line(data.pmouseX, data.pmouseY, data.mouseX, data.mouseY)
+    });
+
+    socket.on('clear', () => {
+        clear();
+    });
+}
+
+    </script>
     
 </body>
 </html>
