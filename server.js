@@ -3,7 +3,7 @@
 const express = require('express');
 const socketIO = require('socket.io');
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 const index = '/index.html';
 const server = express ()
                 .use ((req, res) =>res.sendFile(index, {root: __dirname}))
@@ -12,6 +12,9 @@ const server = express ()
 const io = socketIO(server);
 
 let users = [];
+let timeout = null;
+let currentPlayer = null;
+let words = ["goku", "vegeta", "Gohan", "Piccolo"];
 
 //cmd to launch server "node serve.js"
 
@@ -38,10 +41,15 @@ io.on('connection', (socket) => {
         users = users.filter ((user) => {
             return user !== socket;
         });
+
+        if(users.length === 0){
+            timeout = clearTimeout(timeout);
+        }
     });
-socket.on('line', (data) => {
-    socket.broadcast.emit('line', data);
-});
+
+    socket.on('line', (data) => {
+        socket.broadcast.emit('line', data);
+    });
 
 });
 
@@ -55,10 +63,12 @@ function sendUsers () {
 }
 
 function switchPlayer () {
-    const indexCurrentPlayer = user.indexOF(currentPlayer);
-    currentPlayer = user[(indexCurrentPlayer + 1) % users.length];
+    const indexCurrentPlayer = users.indexOf(currentPlayer);
+    currentPlayer = users[(indexCurrentPlayer + 1) % users.length];
 
     sendUsers();
+
+    const nextWord = words[Math.floor(Math.random() * words.length)];
     io.emit('clear');
     timeout = setTimeout( switchPlayer, 15000);
 }

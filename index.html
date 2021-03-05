@@ -68,7 +68,12 @@ function mouseDragged () {
     socket.on('clear', () => {
         clear();
     });
+
+    socket.on('word', (word) => {
+        alert(`you need to draw: ${word}`);
+    });
 }
+   
 
     </script>
     

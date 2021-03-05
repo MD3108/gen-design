@@ -2,7 +2,7 @@
   "name": "skribble",
   "version": "0.0.1",
   "description": "school project ",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start" : "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
